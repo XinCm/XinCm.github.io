@@ -10761,7 +10761,7 @@ body > .section {
 }
 .card {
   overflow: visible;
-  border-radius: 0;
+  border-radius: 15px;
 }
 .card + .card,
 .card + .column-right-shadow {
@@ -10769,8 +10769,8 @@ body > .section {
 }
 .card .card-image {
   overflow: hidden;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 .card .media + .media {
   border: none;
@@ -11424,7 +11424,7 @@ figure.highlight.foldable div.level-left {
   line-height: 0;
   overflow: hidden;
   box-shadow: none, 0 0 1px rgba(0,0,0,0.1);
-  border-radius: 0;
+  border-radius: 15px;
 }
 .donate .qrcode img {
   max-width: 280px;
@@ -11528,7 +11528,7 @@ figure.highlight.foldable div.level-left {
   outline: none;
   padding: 8px 0;
   line-height: 24px;
-  border-radius: 0;
+  border-radius: 15px;
   transform: translateY(120px);
   transition: 0.4s ease opacity, 0.4s ease width, 0.4s ease transform, 0.4s ease border-radius;
 }
@@ -11608,7 +11608,7 @@ figure.highlight.foldable div.level-left {
   background-color: #000 !important;
 }
 .cc-window.cc-floating {
-  border-radius: 0;
+  border-radius: 15px;
   box-shadow: none, 0 0 1px rgba(0,0,0,0.1);
 }
 .cc-window.cc-banner {
@@ -11644,18 +11644,18 @@ figure.highlight.foldable div.level-left {
 @media screen and (min-width: 1280px) {
   .is-1-column .container,
   .is-2-column .container {
-    max-width: 960px;
-    width: 960px;
+    max-width: 1152px;
+    width: 1152px;
   }
 }
 @media screen and (min-width: 1472px) {
   .is-2-column .container {
-    max-width: 1152px;
-    width: 1152px;
+    max-width: $fulled -128px;
+    width: $fulled -128px;
   }
   .is-1-column .container {
-    max-width: 960px;
-    width: 960px;
+    max-width: 1344px;
+    width: 1344px;
   }
 }
 @media screen and (min-width: 769px), print {

@@ -42,7 +42,7 @@
     <published>2024-01-03T06:01:22.112Z</published>
     <updated>2024-01-03T06:01:22.112Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="ANDROID-HAL-Project-Treble"><a href="#ANDROID-HAL-Project-Treble" class="headerlink" title="ANDROID HAL- Project Treble"></a>ANDROID HAL- <strong>Project Treble</strong></h1><h2 id="1-HAL至今有四种架构"><a href="#1-HAL至今有四种架构" class="headerlink" title="1. HAL至今有四种架构"></a>1. HAL至今有四种架构</h2><blockquote><ul><li>Treble Project 之前使用的实现架构,使用传统 HAL 和旧版 HAL</li><li>直通式（passthrough mode）：Framework 和 HAL 层工作在同一个进程当中</li><li>绑定式（binderized mode）：直通式 HAL binder 化，变为绑定式 HAL。Framework 和 HAL 层工作在不同的进程，之间通过 Binder 进行 IPC</li><li>纯绑定式 ：相对于<strong>绑定式</strong>来说，绑定式 HAL 中并不包含直通式 HAL，因此称为纯绑定式</li></ul></blockquote><span id="more"></span><p>根据谷歌要求，出厂时就搭载 8.0 的设备，除了谷歌规定的 <a href="mailto:&#97;&#x6e;&#x64;&#x72;&#x6f;&#105;&#x64;&#46;&#x68;&#x61;&#x72;&#x64;&#x77;&#x61;&#x72;&#101;&#x2e;&#x67;&#114;&#97;&#x70;&#x68;&#x69;&#x63;&#x73;&#46;&#x6d;&#x61;&#112;&#x70;&#x65;&#x72;&#x40;&#x31;&#46;&#x30;">&#97;&#x6e;&#x64;&#x72;&#x6f;&#105;&#x64;&#46;&#x68;&#x61;&#x72;&#x64;&#x77;&#x61;&#x72;&#101;&#x2e;&#x67;&#114;&#97;&#x70;&#x68;&#x69;&#x63;&#x73;&#46;&#x6d;&#x61;&#112;&#x70;&#x65;&#x72;&#x40;&#x31;&#46;&#x30;</a> 和 <a href="mailto:&#97;&#x6e;&#100;&#x72;&#x6f;&#105;&#100;&#46;&#x68;&#97;&#x72;&#100;&#x77;&#x61;&#114;&#101;&#x2e;&#114;&#x65;&#110;&#100;&#101;&#x72;&#115;&#x63;&#114;&#105;&#112;&#x74;&#x40;&#49;&#46;&#48;">&#97;&#x6e;&#100;&#x72;&#x6f;&#105;&#100;&#46;&#x68;&#97;&#x72;&#100;&#x77;&#x61;&#114;&#101;&#x2e;&#114;&#x65;&#110;&#100;&#101;&#x72;&#115;&#x63;&#114;&#105;&#112;&#x74;&#x40;&#49;&#46;&#48;</a> 需使用 ②直通模式，其它 HAL 只能采用 绑定式 和 纯绑定式 模式的实现架构。</p><hr><h2 id="2-绑定式"><a href="#2-绑定式" class="headerlink" title="2. 绑定式"></a>2. 绑定式</h2><ul><li><p>绑定式hal 在直通式的基础上，添加 service 进程，修改 transport 类型为 hwbinder</p></li><li><p>service 的注册使用的是 <a href="https://android.googlesource.com/platform/hardware/interfaces/+/refs/tags/android-8.1.0_r65/graphics/composer/2.1/default/service.cpp#43">defaultPassthroughServiceImplementation()</a> 方法</p></li><li><p><code>*-impl.so</code> 库文件通过 <code>HIDL_FETCH_I***</code> 方法来加载传统 HAL(一般硬件厂家提供so共享库)</p></li><li><p>厂商的实现都在 service 中</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">impl.so:</span><br><span class="line">            cc_library_shared &#123;</span><br><span class="line">                name: &quot;android.hardware.gnss@1.0-impl&quot;,</span><br><span class="line">                    ...</span><br><span class="line">                srcs: [...],</span><br><span class="line">                shared_libs: [...],</span><br><span class="line">            &#125;</span><br><span class="line">service:</span><br><span class="line">            cc_binary &#123;</span><br><span class="line">                name: &quot;android.hardware.gnss@1.0-service&quot;,</span><br><span class="line">                    ...</span><br><span class="line">                srcs: [&quot;service.cpp&quot;],</span><br><span class="line">                shared_libs: [...],</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure></li></ul><hr><h2 id="3-纯绑定式"><a href="#3-纯绑定式" class="headerlink" title="3. 纯绑定式"></a>3. 纯绑定式</h2><ul><li>service 的注册方法都是 <code>registerAsService()</code>，在 manifest.xml 中的 transport 类型为 hwbinder</li><li>**不再单独编译 <code>*-impl.so</code>**，而是全编译进 service 中。</li></ul>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cc_binary &#123;</span><br><span class="line">    name: &quot;android.hardware.gnss@2.0-service&quot;,</span><br><span class="line">...</span><br><span class="line">    srcs: [</span><br><span class="line">    &quot;service.cpp&quot;,</span><br><span class="line">        &quot;GnssConfiguration.cpp&quot;,</span><br><span class="line">... </span><br><span class="line">    ],</span><br><span class="line">    shared_libs: [...],</span><br><span class="line">    static_libs: [...],</span><br></pre></td></tr></table></figure><hr><p><strong>参考：</strong> </p><p><a href="https://blog.omitol.com/2018/11/09/android-treble-hidl/">https://blog.omitol.com/2018/11/09/android-treble-hidl/</a></p><p><a href="https://source.android.google.cn/docs/core/architecture/hidl?hl=zh-cn">HIDL  | Android 开源项目  | Android Open Source Project (google.cn)</a></p>]]></content>
+    <content type="html"><![CDATA[<h1 id="ANDROID-HAL-Project-Treble"><a href="#ANDROID-HAL-Project-Treble" class="headerlink" title="ANDROID HAL- Project Treble"></a>ANDROID HAL- <strong>Project Treble</strong></h1><h2 id="1-HAL至今有四种架构"><a href="#1-HAL至今有四种架构" class="headerlink" title="1. HAL至今有四种架构"></a>1. HAL至今有四种架构</h2><blockquote><ul><li>Treble Project 之前使用的实现架构,使用传统 HAL 和旧版 HAL</li><li>直通式（passthrough mode）：Framework 和 HAL 层工作在同一个进程当中</li><li>绑定式（binderized mode）：直通式 HAL binder 化，变为绑定式 HAL。Framework 和 HAL 层工作在不同的进程，之间通过 Binder 进行 IPC</li><li>纯绑定式 ：相对于<strong>绑定式</strong>来说，绑定式 HAL 中并不包含直通式 HAL，因此称为纯绑定式</li></ul></blockquote><span id="more"></span><p>根据谷歌要求，出厂时就搭载 8.0 的设备，除了谷歌规定的 <a href="mailto:&#97;&#x6e;&#x64;&#x72;&#x6f;&#x69;&#x64;&#x2e;&#104;&#x61;&#x72;&#x64;&#119;&#97;&#x72;&#101;&#x2e;&#103;&#x72;&#x61;&#112;&#104;&#105;&#99;&#115;&#46;&#109;&#x61;&#x70;&#x70;&#101;&#x72;&#x40;&#x31;&#x2e;&#48;">&#97;&#x6e;&#x64;&#x72;&#x6f;&#x69;&#x64;&#x2e;&#104;&#x61;&#x72;&#x64;&#119;&#97;&#x72;&#101;&#x2e;&#103;&#x72;&#x61;&#112;&#104;&#105;&#99;&#115;&#46;&#109;&#x61;&#x70;&#x70;&#101;&#x72;&#x40;&#x31;&#x2e;&#48;</a> 和 <a href="mailto:&#x61;&#110;&#x64;&#x72;&#111;&#105;&#100;&#46;&#x68;&#97;&#114;&#x64;&#119;&#97;&#x72;&#x65;&#x2e;&#x72;&#101;&#110;&#100;&#101;&#114;&#115;&#x63;&#114;&#x69;&#x70;&#x74;&#x40;&#x31;&#46;&#48;">&#x61;&#110;&#x64;&#x72;&#111;&#105;&#100;&#46;&#x68;&#97;&#114;&#x64;&#119;&#97;&#x72;&#x65;&#x2e;&#x72;&#101;&#110;&#100;&#101;&#114;&#115;&#x63;&#114;&#x69;&#x70;&#x74;&#x40;&#x31;&#46;&#48;</a> 需使用 ②直通模式，其它 HAL 只能采用 绑定式 和 纯绑定式 模式的实现架构。</p><hr><h2 id="2-绑定式"><a href="#2-绑定式" class="headerlink" title="2. 绑定式"></a>2. 绑定式</h2><ul><li><p>绑定式hal 在直通式的基础上，添加 service 进程，修改 transport 类型为 hwbinder</p></li><li><p>service 的注册使用的是 <a href="https://android.googlesource.com/platform/hardware/interfaces/+/refs/tags/android-8.1.0_r65/graphics/composer/2.1/default/service.cpp#43">defaultPassthroughServiceImplementation()</a> 方法</p></li><li><p><code>*-impl.so</code> 库文件通过 <code>HIDL_FETCH_I***</code> 方法来加载传统 HAL(一般硬件厂家提供so共享库)</p></li><li><p>厂商的实现都在 service 中</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">impl.so:</span><br><span class="line">            cc_library_shared &#123;</span><br><span class="line">                name: &quot;android.hardware.gnss@1.0-impl&quot;,</span><br><span class="line">                    ...</span><br><span class="line">                srcs: [...],</span><br><span class="line">                shared_libs: [...],</span><br><span class="line">            &#125;</span><br><span class="line">service:</span><br><span class="line">            cc_binary &#123;</span><br><span class="line">                name: &quot;android.hardware.gnss@1.0-service&quot;,</span><br><span class="line">                    ...</span><br><span class="line">                srcs: [&quot;service.cpp&quot;],</span><br><span class="line">                shared_libs: [...],</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure></li></ul><hr><h2 id="3-纯绑定式"><a href="#3-纯绑定式" class="headerlink" title="3. 纯绑定式"></a>3. 纯绑定式</h2><ul><li>service 的注册方法都是 <code>registerAsService()</code>，在 manifest.xml 中的 transport 类型为 hwbinder</li><li>**不再单独编译 <code>*-impl.so</code>**，而是全编译进 service 中。</li></ul>   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cc_binary &#123;</span><br><span class="line">    name: &quot;android.hardware.gnss@2.0-service&quot;,</span><br><span class="line">...</span><br><span class="line">    srcs: [</span><br><span class="line">    &quot;service.cpp&quot;,</span><br><span class="line">        &quot;GnssConfiguration.cpp&quot;,</span><br><span class="line">... </span><br><span class="line">    ],</span><br><span class="line">    shared_libs: [...],</span><br><span class="line">    static_libs: [...],</span><br></pre></td></tr></table></figure><hr><p><strong>参考：</strong> </p><p><a href="https://blog.omitol.com/2018/11/09/android-treble-hidl/">https://blog.omitol.com/2018/11/09/android-treble-hidl/</a></p><p><a href="https://source.android.google.cn/docs/core/architecture/hidl?hl=zh-cn">HIDL  | Android 开源项目  | Android Open Source Project (google.cn)</a></p>]]></content>
     
     
     <summary type="html">&lt;h1 id=&quot;ANDROID-HAL-Project-Treble&quot;&gt;&lt;a href=&quot;#ANDROID-HAL-Project-Treble&quot; class=&quot;headerlink&quot; title=&quot;ANDROID HAL- Project Treble&quot;&gt;&lt;/a&gt;ANDROID HAL- &lt;strong&gt;Project Treble&lt;/strong&gt;&lt;/h1&gt;&lt;h2 id=&quot;1-HAL至今有四种架构&quot;&gt;&lt;a href=&quot;#1-HAL至今有四种架构&quot; class=&quot;headerlink&quot; title=&quot;1. HAL至今有四种架构&quot;&gt;&lt;/a&gt;1. HAL至今有四种架构&lt;/h2&gt;&lt;blockquote&gt;
@@ -57,33 +57,6 @@
     
     
     <category term="Android技术" scheme="http://example.com/categories/Android%E6%8A%80%E6%9C%AF/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>GIT</title>
-    <link href="http://example.com/2024/01/02/git/"/>
-    <id>http://example.com/2024/01/02/git/</id>
-    <published>2024-01-02T11:33:43.996Z</published>
-    <updated>2024-01-02T11:33:43.996Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="GIT"><a href="#GIT" class="headerlink" title="GIT"></a>GIT</h1><hr><h3 id="git-amend"><a href="#git-amend" class="headerlink" title="git  amend"></a>git  amend</h3><ul><li>修改上次的 commit  提交</li><li>直接覆盖上次的commit,生成新的commit ID</li><li>保留上次commit的修改，将新修改合并到上次的commit</li></ul><blockquote><p>git add<br>git commit –amend</p></blockquote><span id="more"></span><hr><h3 id="git-clean"><a href="#git-clean" class="headerlink" title="git clean"></a>git clean</h3><p>从工作目录中删除未被版本控制的文件或目录。它通常用于清理工作目录，删除一些生成的或不必要的文件，以确保工作目录的状态是干净的。</p><blockquote><p>git clean -n      显示 将要 删除的 文件 和  目录<br>git clean -f　　删除当前目录下所有没有track过的文件. 他不会删除.gitignore文件里面指定的文件夹和文件, 不管这些文件有没有被track过.<br>git clean -df     删除当前目录下没有被track过的文件和文件夹<br>git clean -xfd   删除当前目录下所有没有track过的文件. 不管他是否是.gitignore文件里面指定的文件夹和文件.</p></blockquote><hr><h1 id="REPO"><a href="#REPO" class="headerlink" title="REPO"></a>REPO</h1><hr><hr><h3 id="repo-start"><a href="#repo-start" class="headerlink" title="repo start"></a>repo start</h3><p>repo start  <branch-name> [–all] [–rebase | –detach | –current-branch] [projects…]<br>为所有模块创建一个分支</p><blockquote><p><code>&lt;branch-name&gt;</code>: 要创建的新分支的名称。<br><code>--all</code>: 为所有项目创建分支。<br><code>--rebase</code>: 使用 rebase 方式创建分支（默认方式）。<br><code>--detach</code>: 创建一个分离头的分支。<br><code>--current-branch</code>: 在当前分支上工作，不切换到新分支。<br><code>projects...</code>: 要在其上创建新分支的项目（可选）。</p></blockquote><hr><h3 id="repo-status"><a href="#repo-status" class="headerlink" title="repo status"></a>repo status</h3><p>显示 project 中每个仓库的状态，并打印仓库名称。</p><hr><h3 id="repo-forall-c"><a href="#repo-forall-c" class="headerlink" title="repo forall -c"></a>repo forall -c</h3><p>遍历所有的git仓库，并在每个仓库执行-c所指定的命令（被执行的命令不限于git命令，而是任何被系统支持的命令，比如：ls 、 pwd 、cp 等 。</p><blockquote><p>ex :<br>    <strong>repo forall -c ‘git reset –hard &amp;&amp; git clean -fdx’</strong><br>    这个命令会对 Repo 管理的每个 Git 仓库执行两个命令：<br>    <code>git reset --hard</code>：将所有本地修改的文件丢弃，将 HEAD 恢复到最近的一次提交状态。<br>    <code>git clean -fdx</code>：删除所有未被 Git 跟踪的文件，包括构建产物、临时文件等。</p></blockquote>]]></content>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;GIT&quot;&gt;&lt;a href=&quot;#GIT&quot; class=&quot;headerlink&quot; title=&quot;GIT&quot;&gt;&lt;/a&gt;GIT&lt;/h1&gt;&lt;hr&gt;
-&lt;h3 id=&quot;git-amend&quot;&gt;&lt;a href=&quot;#git-amend&quot; class=&quot;headerlink&quot; title=&quot;git  amend&quot;&gt;&lt;/a&gt;git  amend&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;修改上次的 commit  提交&lt;/li&gt;
-&lt;li&gt;直接覆盖上次的commit,生成新的commit ID&lt;/li&gt;
-&lt;li&gt;保留上次commit的修改，将新修改合并到上次的commit&lt;/li&gt;
-&lt;/ul&gt;
-&lt;blockquote&gt;
-&lt;p&gt;git add&lt;br&gt;git commit –amend&lt;/p&gt;
-&lt;/blockquote&gt;</summary>
-    
-    
-    
-    <category term="开发工具" scheme="http://example.com/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"/>
     
     
   </entry>
@@ -178,27 +151,6 @@
   </entry>
   
   <entry>
-    <title>BootChart使用手顺</title>
-    <link href="http://example.com/2023/12/01/bootchart%E4%BD%BF%E7%94%A8%E6%89%8B%E9%A1%BA/"/>
-    <id>http://example.com/2023/12/01/bootchart%E4%BD%BF%E7%94%A8%E6%89%8B%E9%A1%BA/</id>
-    <published>2023-12-01T06:02:04.070Z</published>
-    <updated>2023-12-01T06:02:04.070Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>BootChart是用于linux启动过程性能分析的开源软件工具，它可以在内核装载后就开始运行，记录各个程序启动占用的时间、CPU以及硬盘读写，直到系统启动完成为止。</p></blockquote><span id="more"></span><h2 id="STEP1"><a href="#STEP1" class="headerlink" title="STEP1"></a>STEP1</h2><p>kernel config中打开以下四个配置：</p><blockquote><p>CONFIG_PROC_FS&#x3D;y<br>CONFIG_SCHEDSTATS&#x3D;y<br>CONFIG_SCHED_DEBUG&#x3D;y<br>CONFIG_LATENCYTOP&#x3D;y</p></blockquote><h2 id="STEP2"><a href="#STEP2" class="headerlink" title="STEP2"></a>STEP2</h2><p>bootchart工程编译生成两个产物：</p><blockquote><p>bootchartd: 放在目录&#x2F;sbin下<br>bootchartd.conf :放在目录&#x2F;etc下</p></blockquote><h2 id="STEP3"><a href="#STEP3" class="headerlink" title="STEP3"></a>STEP3</h2><p>修改uboot cmdline中，init&#x3D;bootchartd</p><h2 id="STEP4"><a href="#STEP4" class="headerlink" title="STEP4"></a>STEP4</h2><p>重启机器，在&#x2F;var&#x2F;log 目录下生成 .svg 文件   </p><p><em>注意事项</em>:<br><em>1、若系统开启selinux,需要考虑权限问题，不确定是否有影响可以先关闭selinux查看svg文件是否正常生成</em></p><p><em>2、必须保证&#x2F;var目录有可写权限，一般嵌入式系统默认rootfs是ro,需修改其权限</em></p><p><em>3、若无法在系统命令行对cmdline修改，需要在step3中源码修改完cmdline后，单独烧录uboot。顺序必须为先将两个产物放入对应目录，再修改cmdline, 否则会导致init 查找不到&#x2F;sbin&#x2F;bootchard 导致crash</em></p>]]></content>
-    
-    
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;BootChart是用于linux启动过程性能分析的开源软件工具，它可以在内核装载后就开始运行，记录各个程序启动占用的时间、CPU以及硬盘读写，直到系统启动完成为止。&lt;/p&gt;
-&lt;/blockquote&gt;</summary>
-    
-    
-    
-    <category term="开发工具" scheme="http://example.com/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>GDB 常用手顺</title>
     <link href="http://example.com/2023/12/01/GDB%20%E5%B8%B8%E7%94%A8%E6%89%8B%E9%A1%BA/"/>
     <id>http://example.com/2023/12/01/GDB%20%E5%B8%B8%E7%94%A8%E6%89%8B%E9%A1%BA/</id>
@@ -210,6 +162,27 @@
     
     <summary type="html">&lt;blockquote&gt;
 &lt;p&gt;GDB usage&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="开发工具" scheme="http://example.com/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>BootChart使用手顺</title>
+    <link href="http://example.com/2023/12/01/bootchart%E4%BD%BF%E7%94%A8%E6%89%8B%E9%A1%BA/"/>
+    <id>http://example.com/2023/12/01/bootchart%E4%BD%BF%E7%94%A8%E6%89%8B%E9%A1%BA/</id>
+    <published>2023-12-01T06:02:04.070Z</published>
+    <updated>2023-12-01T06:02:04.070Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>BootChart是用于linux启动过程性能分析的开源软件工具，它可以在内核装载后就开始运行，记录各个程序启动占用的时间、CPU以及硬盘读写，直到系统启动完成为止。</p></blockquote><span id="more"></span><h2 id="STEP1"><a href="#STEP1" class="headerlink" title="STEP1"></a>STEP1</h2><p>kernel config中打开以下四个配置：</p><blockquote><p>CONFIG_PROC_FS&#x3D;y<br>CONFIG_SCHEDSTATS&#x3D;y<br>CONFIG_SCHED_DEBUG&#x3D;y<br>CONFIG_LATENCYTOP&#x3D;y</p></blockquote><h2 id="STEP2"><a href="#STEP2" class="headerlink" title="STEP2"></a>STEP2</h2><p>bootchart工程编译生成两个产物：</p><blockquote><p>bootchartd: 放在目录&#x2F;sbin下<br>bootchartd.conf :放在目录&#x2F;etc下</p></blockquote><h2 id="STEP3"><a href="#STEP3" class="headerlink" title="STEP3"></a>STEP3</h2><p>修改uboot cmdline中，init&#x3D;bootchartd</p><h2 id="STEP4"><a href="#STEP4" class="headerlink" title="STEP4"></a>STEP4</h2><p>重启机器，在&#x2F;var&#x2F;log 目录下生成 .svg 文件   </p><p><em>注意事项</em>:<br><em>1、若系统开启selinux,需要考虑权限问题，不确定是否有影响可以先关闭selinux查看svg文件是否正常生成</em></p><p><em>2、必须保证&#x2F;var目录有可写权限，一般嵌入式系统默认rootfs是ro,需修改其权限</em></p><p><em>3、若无法在系统命令行对cmdline修改，需要在step3中源码修改完cmdline后，单独烧录uboot。顺序必须为先将两个产物放入对应目录，再修改cmdline, 否则会导致init 查找不到&#x2F;sbin&#x2F;bootchard 导致crash</em></p>]]></content>
+    
+    
+    <summary type="html">&lt;blockquote&gt;
+&lt;p&gt;BootChart是用于linux启动过程性能分析的开源软件工具，它可以在内核装载后就开始运行，记录各个程序启动占用的时间、CPU以及硬盘读写，直到系统启动完成为止。&lt;/p&gt;
 &lt;/blockquote&gt;</summary>
     
     
