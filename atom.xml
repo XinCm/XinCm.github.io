@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-01-05T07:30:13.301Z</updated>
+  <updated>2021-01-09T16:00:00.000Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>内存对齐</title>
+    <link href="http://example.com/2024/01/09/%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90/"/>
+    <id>http://example.com/2024/01/09/%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90/</id>
+    <published>2024-01-08T16:00:00.000Z</published>
+    <updated>2021-01-09T16:00:00.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>维基百科中对内存对齐的定义：</p><blockquote><p><strong>内存地址</strong>a<em>被称为</em>n<strong>字节</strong>对齐<em>，</em>a<em>是</em>n<em>的倍数（</em>n<em>应是2的[幂]），也可以理解为当被访问的数据长度为</em>n* 字节时，数据地址为<em>n</em>字节对齐。如果内存未对齐，称作<em>misaligned</em>。</p><p><strong>内存指针</strong>是对齐的，如果它所指的数据是对齐的。指向聚合数据（aggregate data，如struct或数组）是对齐的，当且仅当它的每个组成数据是对齐的。</p></blockquote><span id="more"></span><p><strong>一句话总结，内存对齐的目的是 牺牲内存空间，换取运行效率</strong></p><hr><br /> <h2 id="技术细节"><a href="#技术细节" class="headerlink" title="技术细节"></a>技术细节</h2><p>假设现在的<strong>系统为32位</strong>只能从地址为<strong>4的倍数的内存</strong>进行读取数据。如果没有内存对齐，数据任意存放，那么假如一个int类型的数据是<strong>从地址2开始存储</strong>的（<strong>占用2，3，4，5</strong>）那么内存在寻址的时候需要读取两个字节块，并且需要<strong>剔除0，1，6，7四个地址</strong>，并<strong>把地址2，3，4，5合并成一起</strong>，降低了效率，提高了成本。于是就有了内存对齐。</p><p>如果不内存对齐的话，由于硬件的限制，会导致<strong>访存次数增加</strong>，影响了效率。因为尽管<strong>内存以字节为单位</strong>，但是大部分处理器不是按字节来存取内存的，它们一般会以<strong>双字节，4字节，8字节，16字节以及32字节</strong>为单位来存取内存，我们将上述这些内存存取单位称为<strong>内存存取粒度</strong>。</p><p>32位系统一次读取4字节，64位系统一次读取8字节，此数值与系统的地址线有关。</p><p>以32位系统举例，数据线为32位，一次性可读取32位，即 4字节。</p><br /> <h3 id="注意区分寻址线和数据总线："><a href="#注意区分寻址线和数据总线：" class="headerlink" title="注意区分寻址线和数据总线："></a>注意区分寻址线和数据总线：</h3><p>读取数据的线是数据总线（Data Bus），它用于传输实际的数据。数据总线的宽度决定了在一次传输中可以传送的数据位数。例如，32位的数据总线可以传输32位（4字节）的数据。</p><p>当处理器要从内存中读取数据时，它会将要读取的内存地址放在寻址线上，然后将读取到的数据放在数据总线上，这样中央处理器就可以访问所需的数据。</p><hr><br /><h2 id="对齐规则"><a href="#对齐规则" class="headerlink" title="对齐规则"></a>对齐规则</h2><p>每个特定平台上的编译器都有自己默认“<strong>对齐系数</strong>”（也叫对齐模数）。<br>有效对齐值是指给定值”<strong>对齐系数</strong>“和数据结构体中最长数据类型长度中较小的那个。有效对齐值也叫<strong>对齐单位</strong>。<br><br /></p><ol><li><p>结构体中对一个成员的偏移量为0，以后每个成员相对于结构体首地址的偏移量都是<strong>该成员大小与有效对齐值中较小那个</strong>的整数倍，如有需要编译器会在成员之间加上填充字节。</p></li><li><p>结构体的总大小为 有效对齐值 的<strong>整数倍</strong>，如有需要编译器会在最末一个成员之后加上填充字节</p></li></ol><p><strong>PS</strong>： <em>#pragma pack(n)</em>  规则仅影响结构体的对齐方式，对于独立变量，默认根据特定平台的自然对齐要求进行对齐，这通常是编译器的默认行为。</p><br /><hr>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;定义&quot;&gt;&lt;a href=&quot;#定义&quot; class=&quot;headerlink&quot; title=&quot;定义&quot;&gt;&lt;/a&gt;定义&lt;/h2&gt;&lt;p&gt;维基百科中对内存对齐的定义：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;内存地址&lt;/strong&gt;a&lt;em&gt;被称为&lt;/em&gt;n&lt;strong&gt;字节&lt;/strong&gt;对齐&lt;em&gt;，&lt;/em&gt;a&lt;em&gt;是&lt;/em&gt;n&lt;em&gt;的倍数（&lt;/em&gt;n&lt;em&gt;应是2的[幂]），也可以理解为当被访问的数据长度为&lt;/em&gt;n* 字节时，数据地址为&lt;em&gt;n&lt;/em&gt;字节对齐。如果内存未对齐，称作&lt;em&gt;misaligned&lt;/em&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;内存指针&lt;/strong&gt;是对齐的，如果它所指的数据是对齐的。指向聚合数据（aggregate data，如struct或数组）是对齐的，当且仅当它的每个组成数据是对齐的。&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="Linux" scheme="http://example.com/categories/Linux/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>GIT</title>
