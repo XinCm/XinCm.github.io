@@ -22,7 +22,7 @@
 
     if (typeof moment === 'function') {
         $('.article-meta time').each(function() {
-            $(this).text(moment($(this).attr('datetime')).fromNow());
+            $(this).text(moment($(this).attr('datetime')).fromat("YYYY-MM-DD"));
            /* $(this).text(article0moment($(this).attr('datetime')).format("YYYY-MM-DD"));*/
         });
     }
