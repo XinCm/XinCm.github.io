@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-01-15T05:15:34.082Z</updated>
+  <updated>2024-01-15T16:00:00.000Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>const关键字</title>
+    <link href="http://example.com/2024/01/16/const%E7%9A%84%E4%BD%BF%E7%94%A8/"/>
+    <id>http://example.com/2024/01/16/const%E7%9A%84%E4%BD%BF%E7%94%A8/</id>
+    <published>2024-01-15T16:00:00.000Z</published>
+    <updated>2024-01-15T16:00:00.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在 C&#x2F;C++ 语言中，const关键字是一种<code>修饰符</code>。所谓<code>修饰符</code>，就是在编译器进行编译的过程中，给编译器一些“要求”或“提示”，但修饰符本身，并不产生任何实际代码。就 const 修饰符而言，它用来告诉编译器，<strong>被修饰的这些东西，具有“只读”的特点</strong>。在编译的过程中，一旦我们的代码试图去改变这些东西，编译器就应该给出错误提示。</p><p>主要功能：<strong>使修饰的东西不可修改</strong></p><span id="more"></span><hr><h2 id="1-修饰变量"><a href="#1-修饰变量" class="headerlink" title="1.修饰变量"></a>1.修饰变量</h2><p>const 变量指的是，此变量的值是只读的，不应该被改变。因为 const 变量的值在给定以后不能改变，所以 <strong>const 变量必须被初始化</strong></p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> a = <span class="number">10</span>;</span><br></pre></td></tr></table></figure><p>在C++中，const 全局变量被用来替换一般常量宏定义。因为虽然 const 变量的值不能改变，但是依然是变量，使用时依然会进行类型检查，要比宏定义的直接替换方法更严格一些</p><hr><h2 id="2-修饰结构体"><a href="#2-修饰结构体" class="headerlink" title="2.修饰结构体"></a>2.修饰结构体</h2><p>在C中，const 结构体变量表示<strong>结构体中任何数据域均不允许改变，</strong>且需要另一个结构体变量进行初始化。在C++中，struct与class除了默认访问权限之外，并无本质区别。</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">test</span>&#123;</span><br><span class="line"><span class="type">int</span> a_type;</span><br><span class="line"><span class="type">int</span> b_type;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line"><span class="type">const</span> <span class="keyword">struct</span> <span class="title class_">test</span> abc;   <span class="comment">//编译错误；未初始化只读变量</span></span><br><span class="line">abc.a_type = <span class="number">10</span>;  <span class="comment">//编译错误，不允许修改只读变量</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><hr><h2 id="3-指向-const-变量的指针"><a href="#3-指向-const-变量的指针" class="headerlink" title="3.指向 const 变量的指针"></a>3.指向 const 变量的指针</h2><p>一个指针，其中保存着一个 const 变量的地址。</p><p>**const int <em>p 可从右往左看作( const int )( <em>p ），即指针指向 const int 的变量</em></em></p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">20</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> *p = &amp;a;</span><br><span class="line">p = &amp;b;<span class="comment">//正常，指针的指向可改变</span></span><br><span class="line">*p = <span class="number">100</span>;<span class="comment">//编译错误，不可通过指针改变指向的地址的值</span></span><br></pre></td></tr></table></figure><hr><h2 id="4-const-指针"><a href="#4-const-指针" class="headerlink" title="4.const 指针"></a>4.const 指针</h2><p>一个指针本身经过 const 修饰，自身内容（指针指向）不应该发生改变。<strong>指针的指向一经确定，不能改变。指针指向的内容，可以改变。</strong></p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a = <span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> b = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> * <span class="type">const</span> p = &amp;a;</span><br><span class="line">*p = <span class="number">100</span>;<span class="comment">//正确，const指针指向的值可改变</span></span><br><span class="line"> p = &amp;b;<span class="comment">//错误，const指针自身的值（指向的地址）不可变</span></span><br></pre></td></tr></table></figure><p>指针也是一种变量，只不过其内容保存的是地址而已。所以const指针的内容不能改变，也即是它的指向不能改变。</p><p>**int const <em>p 可看作 （int）( <em>(const p) )</em></em> 即：只读指针，指向int型变量</p><hr><h2 id="5-指向-const-变量的-const-指针"><a href="#5-指向-const-变量的-const-指针" class="headerlink" title="5.指向 const 变量的 const 指针"></a>5.指向 const 变量的 const 指针</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> * <span class="type">const</span> p</span><br></pre></td></tr></table></figure><p>根据4和5分析可得即  <strong>指针的指向和指向的值都不可变</strong></p><hr><h2 id="6-const-变量作为函数参数"><a href="#6-const-变量作为函数参数" class="headerlink" title="6.const 变量作为函数参数"></a>6.const 变量作为函数参数</h2><p>将函数参数声明为 const 类型，表示<strong>对于函数来说，这个参数是一个 const 变量</strong>。也就是说，函数内部不能够改变这个参数的值。</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;在 C&amp;#x2F;C++ 语言中，const关键字是一种&lt;code&gt;修饰符&lt;/code&gt;。所谓&lt;code&gt;修饰符&lt;/code&gt;，就是在编译器进行编译的过程中，给编译器一些“要求”或“提示”，但修饰符本身，并不产生任何实际代码。就 const 修饰符而言，它用来告诉编译器，&lt;strong&gt;被修饰的这些东西，具有“只读”的特点&lt;/strong&gt;。在编译的过程中，一旦我们的代码试图去改变这些东西，编译器就应该给出错误提示。&lt;/p&gt;
+&lt;p&gt;主要功能：&lt;strong&gt;使修饰的东西不可修改&lt;/strong&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="C++" scheme="http://example.com/categories/C/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>C++的参数传递</title>
@@ -423,27 +443,6 @@
     
     
     <category term="Linux" scheme="http://example.com/categories/Linux/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>莫言-《鳄鱼》</title>
-    <link href="http://example.com/2023/11/30/%E8%8E%AB%E8%A8%80-%E3%80%8A%E9%B3%84%E9%B1%BC%E3%80%8B/"/>
-    <id>http://example.com/2023/11/30/%E8%8E%AB%E8%A8%80-%E3%80%8A%E9%B3%84%E9%B1%BC%E3%80%8B/</id>
-    <published>2023-11-30T07:53:37.844Z</published>
-    <updated>2023-11-30T07:53:37.844Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p>《鳄鱼》分为四幕九场，讲述的是一位逃亡国外的腐败官员的故事。情节围绕腐败官员单无惮及其在生日派对上收到的贺礼“鳄鱼”展开：2005年无惮五十五岁生日时，做观赏鱼生意的商人老黑送他一条三十厘米长的小鳄鱼作为寿礼。了解到鳄鱼的生长取决于环境限制程度的特性，心事重重的无惮对鳄鱼产生了浓厚的兴趣。十年间，无惮身边各色人等粉墨登场，前妻巧玲欲与情人瘦马争夺无惮所居别墅的所有权；“外甥”牛布与行为艺术表演者灯罩一边从无惮身上榨取“艺术素材”，一边劝诱无惮加入他们的行列……无惮与鳄鱼越发亲近，觉得只有鳄鱼才能了解他的心声。他不断为鳄鱼更换更大的鱼缸，纵容着鳄鱼不断长大，直至成为长达四米的庞然巨兽。</p></blockquote><span id="more"></span>  <p>故事内容和寓意没有太多的感触，情节的冲突性很少，个人感觉一般。但是对其之外的一个文章细节有所感悟。主人公无惮作为一个在逃贪官，在书中展现出的形象相比身边人反而是更爱国的，并且个人也是具有人格魅力的。这种矛盾感却能让人觉得很合理。无惮在短短的四幕话剧中，无数次提到了自己对故土的想念，以及自我嘲弄，一口一个愧对人民，不配当人。 他难道是真心的呢？ 无惮此刻身在美国，身边又都是同流之辈，完全没必要再去装给别人看，所以我倾向于他的这种情绪不是装的，但也不是真的，他不是真心觉得自己做错了，愧对人民和国家，如果让他再来一次，我相信他依然会选择当一个贪官。</p><p>无惮的这种行为，我的理解是 借用自嘲和自我贬低来企图减轻一点自己的罪恶感，同时又能获得道德精神上的崇高感。所有知道 “ 好 ” 而选择 “ 坏 ” 的人或多或少都如此。他用 “ 造桥让你们贪了，但是质量必须要好 ”这种故事来标榜自己是一个复杂的好官，用现在流行的形容词来说，他是一个表演型人格，但是他不演给其他人，而是演给自己。这是坏的不那么纯粹的人惯用的伎俩。他没有办法打心底里说出“人不为己，天诛地灭”，“我只管我自己舒服，他人与我何干”这种话，因为他知道对的东西长什么样，更清楚他就是不对。无惮是有内心世界的，他随时都在和自己对话，这种对话时刻折磨着他，也就是老话说的，良心的谴责。但也仅仅是自我满足一类的谴责罢了。没错，谴责也可以自我满足，你让他真回国接受审判，他是万万不肯的。这种性格的人，批评与谴责远比赞美更加来的让他心安。</p><p>这种人是很可悲的，他清楚知道自己的问题在哪，清楚知道自己想要什么，但是他永远也到不了。他被自己的表演型人格束缚住了，他甚至永远以为自己走在更加复杂，无奈却又正确的路上，他再也找不到 “ 真 ”了，对于他而言这远比其他事情来得更可悲。读过书，受过教育的人，思想上容易变得 “ 精致 ”，这种精致来源于读过书，又没读过很多书。他们的 “ 精致 ”更像是一种自以为是，口感好像劣质酒精夹杂着热塑料味儿， 尖锐又刺鼻。更可怕的是，这种三观一旦形成，是根深蒂固的。动人观念如刨人祖坟。他们自以为是，再听不见只言片语。</p><p>光提出问题不解决多少有点耍流氓的嫌疑。我的办法是，“ 真 ”一点，逼着自己纯粹一点，用他人之言来骂醒自己，让自己变成一个纯粹的人，不管好的还是坏的，都纯粹一点，不要把自己放在火堆上慢烤，拷上八十载，把生活过成人间炼狱。</p>]]></content>
-    
-    
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;《鳄鱼》分为四幕九场，讲述的是一位逃亡国外的腐败官员的故事。情节围绕腐败官员单无惮及其在生日派对上收到的贺礼“鳄鱼”展开：2005年无惮五十五岁生日时，做观赏鱼生意的商人老黑送他一条三十厘米长的小鳄鱼作为寿礼。了解到鳄鱼的生长取决于环境限制程度的特性，心事重重的无惮对鳄鱼产生了浓厚的兴趣。十年间，无惮身边各色人等粉墨登场，前妻巧玲欲与情人瘦马争夺无惮所居别墅的所有权；“外甥”牛布与行为艺术表演者灯罩一边从无惮身上榨取“艺术素材”，一边劝诱无惮加入他们的行列……无惮与鳄鱼越发亲近，觉得只有鳄鱼才能了解他的心声。他不断为鳄鱼更换更大的鱼缸，纵容着鳄鱼不断长大，直至成为长达四米的庞然巨兽。&lt;/p&gt;
-&lt;/blockquote&gt;</summary>
-    
-    
-    
-    <category term="读书" scheme="http://example.com/categories/%E8%AF%BB%E4%B9%A6/"/>
     
     
   </entry>
